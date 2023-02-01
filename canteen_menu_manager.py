@@ -7,13 +7,10 @@ from datetime import datetime
 
 # Define the URL of the Mailman archive
 url = "https://mailman.suse.de/pipermail/canteen/" 
-downloadsDir = "./downloads"
-pdfsDir = "./pdfs"
+downloads_dir = "./downloads"
+pdfs_dir = "./pdfs"
 
-calendarWeekToMealPlanDict = {}
-
-# {"$YEAR_$CW": "pdfPath"}
-pdfMapping = {}
+pdf_mapping = {} # {"$YEAR_$CW": "pdfPath"}
 
 
 def getPDFFromDate(date):
@@ -28,19 +25,18 @@ def main():
 
 
 def dateToPDF(date: datetime):
-    return pdfMapping[dateToCWYearString(date)]
+    return pdf_mapping[dateToCWYearString(date)]
 
 
 def parseAndMapPDFs():
-    # pdfs/16_01_2023_bis_29_01_2023_1.pdf
     date_format = '%d_%m_%Y'
-    for pdf_file in pathlib.Path(pdfsDir).glob("*.pdf"):
+    for pdf_file in pathlib.Path(pdfs_dir).glob("*.pdf"):
         pdf_file_str = str(pdf_file)
         pdf_file_str = pdf_file_str[5:pdf_file_str.index("_1.pdf")]
         dateRange = pdf_file_str.split("_bis_")
-        pdfMapping[dateToCWYearString(datetime.strptime(
+        pdf_mapping[dateToCWYearString(datetime.strptime(
             dateRange[0], date_format))] = pdf_file
-        pdfMapping[dateToCWYearString(datetime.strptime(
+        pdf_mapping[dateToCWYearString(datetime.strptime(
             dateRange[1], date_format))] = pdf_file
 
 
@@ -49,7 +45,7 @@ def dateToCWYearString(date: datetime):
 
 
 def downloadMenuPDFs():
-    for txt_file in pathlib.Path(downloadsDir).glob('*.txt'):
+    for txt_file in pathlib.Path(downloads_dir).glob('*.txt'):
         print(f"Reading PDFs for: {txt_file}")
         with open(txt_file, "r+") as file:
             lastFileName = ""
@@ -61,7 +57,7 @@ def downloadMenuPDFs():
                     attachmentUrl = line[line.index("<")+1:line.index(">")]
                     if attachmentUrl.endswith("pdf"):
                         os.system(
-                            f"curl {attachmentUrl} --output {pdfsDir}/" + lastFileName)
+                            f"curl {attachmentUrl} --output {pdfs_dir}/" + lastFileName)
 
         file.close()
 
@@ -85,10 +81,10 @@ def downloadArchiveTxt():
         print(archive_file)
         # Download the archive file
         archive_response = requests.get(url + archive_file)
-        with open(f"{downloadsDir}/{archive_file}", "wb") as file:
+        with open(f"{downloads_dir}/{archive_file}", "wb") as file:
             file.write(archive_response.content)
 
-    os.system('gunzip --keep -f ' + f"{downloadsDir}/*.gz")
+    os.system('gunzip --keep -f ' + f"{downloads_dir}/*.gz")
 
 
 if __name__ == "__main__":
