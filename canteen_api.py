@@ -1,9 +1,7 @@
-#!/bin/python3
-
+#!/usr/bin/python3
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse, HTMLResponse
 import canteen_menu_archiver as canteen
-from googletrans import Translator
 
 # initial setup
 canteen.mapPDFs()

@@ -1,6 +1,7 @@
 # Geeko Eats API
 
-A REST API that provides canteen menu in various formats (PDF, JSON, JSON in English).
+A REST API that provides the Nuremberg frankencampus SUSE canteen menu in various formats (PDF, JSON, JSON in English).
+[SUSE HackWeek 22 Project](https://hackweek.opensuse.org/22/projects/frankencampus-canteen-menu-pdf-parser)
 
 ## Technology Stack
 
