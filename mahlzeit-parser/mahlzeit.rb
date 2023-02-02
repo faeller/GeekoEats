@@ -4,7 +4,7 @@ require 'pdf/reader'
 require 'date'
 require 'json'
 require 'optparse'
-require './lib/helpers'
+require_relative './lib/helpers'
 
 @headers = %w[Angebot Montag Dienstag Mittwoch Donnerstag Freitag]
 @ignore = %w[enthält Beilagentausch Informationen Änderungen]

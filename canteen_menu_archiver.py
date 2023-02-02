@@ -4,40 +4,92 @@ import os
 import pathlib
 from bs4 import BeautifulSoup
 from datetime import datetime
+import pdf_parser_ruby_bridge as ruby_bridge_parser
+import json
+from googletrans import Translator
 
 # Define the URL of the Mailman archive
-url = "https://mailman.suse.de/pipermail/canteen/" 
+url = "https://mailman.suse.de/pipermail/canteen/"
 downloads_dir = "./downloads"
 pdfs_dir = "./pdfs"
 
-pdf_mapping = {} # {"$YEAR_$CW": "pdfPath"}
-
-
-def getPDFFromDate(date):
-    pass
+pdf_mapping = {}  # {"$YEAR_$CW": "pdfPath"}
 
 
 def main():
-    # downloadArchiveTxt()
-    # downloadMenuPDFs()
-    parseAndMapPDFs()
-    print(dateToPDF(datetime.now()))
+    downloadArchiveTxt()
+    downloadMenuPDFs()
+    mapPDFs()
+    parseAndSaveAllPDFsToJSON()
+    translateAndSaveAllJSONFiles()
 
 
 def dateToPDF(date: datetime):
     return pdf_mapping[dateToCWYearString(date)]
 
 
-def parseAndMapPDFs():
+def translateAndSaveAllJSONFiles():
+    translator = Translator()
+
+    for json_file in pathlib.Path(pdfs_dir).glob("*.json"):
+        json_text = pathlib.Path(json_file).read_text()
+
+        if os.path.exists(str(json_file) + ".en"):
+            print("Skipping " + str(json_file) +
+                  " translation, since it's already translated")
+            continue
+
+        with open(str(json_file) + ".en", "w") as f_out:
+            print("Translating JSON for " + str(json_file))
+            try:
+                f_out.write(translator.translate(json_text, dest="en").text)
+            except Exception as e:
+                print(e)
+
+
+def mapPDFs():
     date_format = '%d_%m_%Y'
     for pdf_file in pathlib.Path(pdfs_dir).glob("*.pdf"):
+
         pdf_file_str = str(pdf_file)
         pdf_file_str = pdf_file_str[5:pdf_file_str.index("_1.pdf")]
         dateRange = pdf_file_str.split("_bis_")
+
         pdf_mapping[dateToCWYearString(datetime.strptime(
             dateRange[0], date_format))] = pdf_file
+
         pdf_mapping[dateToCWYearString(datetime.strptime(
             dateRange[1], date_format))] = pdf_file
+
+
+jsonPostprocessingReplacements = {
+    # " i ": " | ",
+    # " I ": " | ",
+    # " l ": " | ",
+    # " L ": " | ",
+    "Montag": "Monday",
+    "Dienstag": "Tuesday",
+    "Mittwoch": "Wednesday",
+    "Donnerstag": "Thursday",
+    "Freitag": "Friday"
+}
+
+
+def parseAndSaveAllPDFsToJSON():
+    for pdf_file in pathlib.Path(pdfs_dir).glob("*.pdf"):
+        with open(str(pdf_file) + ".json", "w") as f_out:
+            print("Parsing JSON for " + str(pdf_file))
+            try:
+                parsedJson = json.dumps(ruby_bridge_parser.parse_pdf(pdf_file))
+
+                for key, value in jsonPostprocessingReplacements.items(): parsedJson = parsedJson.replace(key, value)
+
+                f_out.write(parsedJson)
+            except Exception as e:
+                print(f"PDF {str(pdf_file)} is malformed")
+                print(e)
+                f_out.write(
+                    '{"error": "there was a parser error because the pdf by the canteen was malformed (they are written by hand)"}')
 
 
 def dateToCWYearString(date: datetime):

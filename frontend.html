@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script>
+    $(document).ready(function(){
+      $.getJSON("http://127.0.0.1:8000/date/23.01.2023/json", function(data){
+        Object.keys(data).forEach(function(week){
+          $("#weeks").append(`<h5>Week: ${week}</h5>`);
+          Object.keys(data[week]).forEach(function(day){
+            $("#weeks").append(`<h6>${day}</h6>`);
+            $("#weeks").append(`<table class="table table-striped">`);
+            Object.keys(data[week][day]).forEach(function(meal){
+              $("#weeks").append(`<tr><td>${meal}</td><td>${data[week][day][meal]}</td></tr>`);
+            });
+            $("#weeks").append(`</table>`);
+          });
+        });
+      });
+    });
+  </script>
+</head>
+<body>
+  <div class="container mt-3">
+    <h3>Meal Plan</h3>
+    <div id="weeks"></div>
+  </div>
+</body>
+</html>

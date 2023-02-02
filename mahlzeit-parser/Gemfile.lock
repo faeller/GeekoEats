@@ -17,7 +17,7 @@ PLATFORMS
   x86_64-linux
 
 DEPENDENCIES
-  pdf-reader
+  pdf-reader (~> 2.11)
 
 RUBY VERSION
    ruby 3.1.1p18
