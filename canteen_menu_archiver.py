@@ -9,7 +9,7 @@ import json
 from googletrans import Translator
 
 # Define the URL of the Mailman archive
-url = "https://mailman.suse.de/pipermail/canteen/"
+url = "http://mailman.suse.de/pipermail/canteen/"
 downloads_dir = "./downloads"
 pdfs_dir = "./pdfs"
 
@@ -115,6 +115,7 @@ def downloadMenuPDFs():
 
 
 def downloadArchiveTxt():
+    os.system("mkdir downloads pdfs")
     # Make a request to the URL and get the HTML content
     response = requests.get(url)
     html_content = response.text
